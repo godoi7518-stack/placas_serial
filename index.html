@@ -178,7 +178,49 @@
   .tag.bad{background:var(--danger-soft); color:var(--danger);}
   .empty-row td{color:var(--text-dim); font-family:'Space Grotesk',sans-serif; text-align:center; padding:26px 10px;}
 
-  footer{text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-dim);}
+  footer{text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-dim); display:flex; flex-direction:column; gap:6px; align-items:center;}
+  .version-tag{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.5px;
+    color:var(--text-dim); opacity:.7;
+  }
+
+  .suggest-panel{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:14px;
+    padding:20px; margin-bottom:20px;
+  }
+  .suggest-panel .hint{font-size:12px; color:var(--text-dim); margin:0 0 14px;}
+  .suggest-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;}
+  .suggest-field{
+    display:flex; flex-direction:column; gap:5px;
+  }
+  .suggest-field label{
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .suggest-field input{
+    padding:10px 12px; font-size:13.5px; font-family:'JetBrains Mono',monospace;
+    background:var(--bg-panel-2); border:1.5px solid var(--border); border-radius:8px; color:var(--text);
+    outline:none; transition:border-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .suggest-field input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  .suggest-field input:disabled{opacity:.45; cursor:not-allowed;}
+  .suggest-field.sn-ok input{border-color:var(--accent-dim);}
+
+  .sn-scan-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px;}
+  .sn-scan-row .suggest-field label{display:flex; align-items:center; gap:6px;}
+  .sn-check{color:var(--accent); font-weight:700; display:none;}
+  .suggest-field.sn-ok .sn-check{display:inline;}
+
+  #sugStatus{
+    font-size:12.5px; min-height:16px; margin-bottom:12px; font-family:'JetBrains Mono',monospace;
+  }
+  .btn-primary{
+    width:100%; padding:13px 16px; border-radius:10px; border:1px solid var(--accent-dim);
+    background:var(--accent-soft); color:var(--accent); font-family:'Space Grotesk',sans-serif;
+    font-size:14px; font-weight:600; cursor:pointer; transition:background .15s ease, opacity .15s ease;
+  }
+  .btn-primary:hover:not(:disabled){background:var(--accent); color:var(--bg);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -244,8 +286,50 @@
     </table>
   </div>
 
-  <footer>Os dados da planilha ficam apenas neste navegador — nada é enviado para nenhum servidor.
-    Sempre verifique o código no SAP!
+  <div class="suggest-panel">
+    <div class="panel-head">
+      <h2>Sugerir placa nova</h2>
+    </div>
+    <p class="hint">Não achou o código? Preencha os dados e bipe o mesmo S/N 3 vezes pra confirmar. A sugestão vai direto para aprovação — nada entra na base automaticamente.</p>
+
+    <div class="suggest-grid">
+      <div class="suggest-field">
+        <label for="sugDescricao">Descrição</label>
+        <input type="text" id="sugDescricao" placeholder="Ex: Placa mãe X1" autocomplete="off">
+      </div>
+      <div class="suggest-field">
+        <label for="sugModelo">Modelo</label>
+        <input type="text" id="sugModelo" placeholder="Ex: MS60X" autocomplete="off">
+      </div>
+    </div>
+    <div class="suggest-field" style="margin-bottom:14px;">
+      <label for="sugCodigo">Código sugerido</label>
+      <input type="text" id="sugCodigo" placeholder="Código encontrado no SAP ou embalagem" autocomplete="off">
+    </div>
+
+    <div class="sn-scan-row">
+      <div class="suggest-field" id="sugSnField1">
+        <label>Bipagem 1/3 <span class="sn-check">✓</span></label>
+        <input type="text" id="sugSn1" placeholder="Bipe o S/N" autocomplete="off">
+      </div>
+      <div class="suggest-field" id="sugSnField2">
+        <label>Bipagem 2/3 <span class="sn-check">✓</span></label>
+        <input type="text" id="sugSn2" placeholder="Bipe novamente" autocomplete="off" disabled>
+      </div>
+      <div class="suggest-field" id="sugSnField3">
+        <label>Bipagem 3/3 <span class="sn-check">✓</span></label>
+        <input type="text" id="sugSn3" placeholder="Bipe novamente" autocomplete="off" disabled>
+      </div>
+    </div>
+
+    <p id="sugStatus"></p>
+    <button class="btn-primary" id="sugEnviarBtn" disabled>Enviar sugestão para aprovação</button>
+  </div>
+
+  <footer>
+    <span>Os dados da planilha ficam apenas neste navegador — nada é enviado para nenhum servidor.
+    Sempre verifique o código no SAP!</span>
+    <span class="version-tag" id="versionTag"></span>
   </footer>
 </div>
 
@@ -393,8 +477,104 @@
 
   // Keep focus on the scan field so the barcode reader always has a target
   document.addEventListener('click', (e) => {
-    if (!scanInput.disabled && e.target.closest('header') === null) {
+    if (!scanInput.disabled && e.target.closest('header') === null && e.target.closest('.suggest-panel') === null) {
       scanInput.focus();
+    }
+  });
+
+  // ---------- Versão do site ----------
+  // Só quem edita este arquivo muda esse número (siga semver: major.minor.patch).
+  const APP_VERSION = "1.0.0";
+  document.getElementById('versionTag').textContent = `v${APP_VERSION}`;
+
+  // ---------- Sugestão de nova placa ----------
+  // Endpoint do Formspree: troque pelo seu (formspree.io -> criar form -> copiar endpoint).
+  const FORMSPREE_ENDPOINT = "https://formspree.io/f/xpqvvzjy";
+
+  const sugDescricao = document.getElementById('sugDescricao');
+  const sugModelo = document.getElementById('sugModelo');
+  const sugCodigo = document.getElementById('sugCodigo');
+  const sugSn1 = document.getElementById('sugSn1');
+  const sugSn2 = document.getElementById('sugSn2');
+  const sugSn3 = document.getElementById('sugSn3');
+  const sugSnField1 = document.getElementById('sugSnField1');
+  const sugSnField2 = document.getElementById('sugSnField2');
+  const sugSnField3 = document.getElementById('sugSnField3');
+  const sugStatus = document.getElementById('sugStatus');
+  const sugEnviarBtn = document.getElementById('sugEnviarBtn');
+
+  function setStatus(msg, color){
+    sugStatus.textContent = msg;
+    sugStatus.style.color = color || 'var(--text-dim)';
+  }
+
+  function checarBipagensSugestao(){
+    const v1 = sugSn1.value.trim();
+    const v2 = sugSn2.value.trim();
+    const v3 = sugSn3.value.trim();
+
+    sugSnField1.classList.toggle('sn-ok', !!v1);
+    sugSn2.disabled = !v1;
+    if (!v1) { sugSn2.value = ''; sugSn3.value = ''; }
+
+    sugSnField2.classList.toggle('sn-ok', !!v2 && v2 === v1);
+    sugSn3.disabled = !(v1 && v2);
+    if (!v2) { sugSn3.value = ''; }
+
+    sugSnField3.classList.toggle('sn-ok', !!v3 && v3 === v1 && v3 === v2);
+
+    if (v1 && v2 && v3) {
+      if (v1 === v2 && v2 === v3) {
+        setStatus('✅ S/N confirmado nas 3 bipagens.', 'var(--accent)');
+        sugEnviarBtn.disabled = !(sugDescricao.value.trim() && sugCodigo.value.trim());
+      } else {
+        setStatus('⚠️ As bipagens não bateram. Confira e bipe novamente.', 'var(--warn)');
+        sugEnviarBtn.disabled = true;
+      }
+    } else {
+      sugStatus.textContent = '';
+      sugEnviarBtn.disabled = true;
+    }
+  }
+
+  [sugSn1, sugSn2, sugSn3, sugDescricao, sugCodigo].forEach(input => {
+    input.addEventListener('input', checarBipagensSugestao);
+  });
+
+  sugEnviarBtn.addEventListener('click', async () => {
+    const payload = {
+      descricao: sugDescricao.value.trim(),
+      modelo: sugModelo.value.trim(),
+      codigo_sugerido: sugCodigo.value.trim(),
+      serial_confirmado: sugSn1.value.trim(),
+      data_hora: new Date().toLocaleString('pt-BR'),
+      origem: 'Site de bipagem — sugestão de nova placa'
+    };
+
+    sugEnviarBtn.disabled = true;
+    sugEnviarBtn.textContent = 'Enviando...';
+
+    try {
+      const resp = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (resp.ok) {
+        setStatus('✅ Sugestão enviada! Aguardando aprovação.', 'var(--accent)');
+        [sugSn1, sugSn2, sugSn3].forEach(i => i.value = '');
+        sugSn2.disabled = true; sugSn3.disabled = true;
+        [sugSnField1, sugSnField2, sugSnField3].forEach(f => f.classList.remove('sn-ok'));
+        sugDescricao.value = ''; sugModelo.value = ''; sugCodigo.value = '';
+      } else {
+        throw new Error('Falha no envio');
+      }
+    } catch (err) {
+      setStatus('❌ Erro ao enviar. Tente novamente ou avise o responsável.', 'var(--danger)');
+    } finally {
+      sugEnviarBtn.textContent = 'Enviar sugestão para aprovação';
+      checarBipagensSugestao();
     }
   });
 </script>
