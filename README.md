@@ -1,4 +1,4 @@
-# Bipagem de Placas — Multilaser
+# Bipagem de Placas — Via Serial NUmbers
 
 Site estático para bipar o serial (S/N) de uma placa e consultar o código correspondente, sem precisar instalar nada. Qualquer pessoa da empresa com o link consegue usar.
 
