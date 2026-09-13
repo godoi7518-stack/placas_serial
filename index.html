@@ -261,6 +261,9 @@
       <div class="result-text">
         <div class="r-code" id="resultCode"></div>
         <div class="r-meta" id="resultMeta"></div>
+        <button class="copy-btn" id="copyCodeBtn" title="Copiar código" type="button">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+</button>
       </div>
     </div>
   </div>
@@ -400,6 +403,32 @@
   const resultIcon = document.getElementById('resultIcon');
   const resultCode = document.getElementById('resultCode');
   const resultMeta = document.getElementById('resultMeta');
+  const copyCodeBtn = document.getElementById('copyCodeBtn');
+const checkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+const copyIcon = copyCodeBtn.innerHTML;
+
+copyCodeBtn.addEventListener('click', async () => {
+  const texto = resultCode.textContent.trim();
+  if (!texto || texto === 'Não encontrado') return;
+  try {
+    await navigator.clipboard.writeText(texto);
+  } catch (err) {
+    const temp = document.createElement('textarea');
+    temp.value = texto;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+  }
+  copyCodeBtn.innerHTML = checkIcon;
+  copyCodeBtn.classList.add('copied');
+  copyCodeBtn.title = 'Copiado!';
+  setTimeout(() => {
+    copyCodeBtn.innerHTML = copyIcon;
+    copyCodeBtn.classList.remove('copied');
+    copyCodeBtn.title = 'Copiar código';
+  }, 1400);
+});
   const historyBody = document.getElementById('historyBody');
   const statTotal = document.getElementById('statTotal');
   const statFound = document.getElementById('statFound');
