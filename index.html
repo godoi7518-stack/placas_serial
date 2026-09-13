@@ -139,6 +139,15 @@
   .result.notfound .result-icon{background:var(--danger); color:#fff;}
   .result-text .r-code{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700;}
   .result-text .r-meta{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+  .copy-btn{
+  margin-left:auto; flex-shrink:0;
+  width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
+  background:var(--bg-panel); color:var(--text-dim); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:border-color .15s ease, color .15s ease, background .15s ease;
+   }
+.copy-btn:hover{border-color:var(--accent); color:var(--accent);}
+.copy-btn.copied{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+.copy-btn svg{width:16px; height:16px; pointer-events:none;}
 
   .stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;}
   .stat-card{
@@ -257,17 +266,15 @@
       <input type="text" id="scanInput" placeholder="Aguardando leitura do leitor..." autocomplete="off" disabled>
     </div>
     <div class="result" id="resultBox">
-      <div class="result-icon" id="resultIcon"></div>
-      <div class="result-text">
-        <div class="r-code" id="resultCode"></div>
-        <div class="r-meta" id="resultMeta"></div>
-        <button class="copy-btn" id="copyCodeBtn" title="Copiar código" type="button">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-</button>
-      </div>
-    </div>
+  <div class="result-icon" id="resultIcon"></div>
+  <div class="result-text">
+    <div class="r-code" id="resultCode"></div>
+    <div class="r-meta" id="resultMeta"></div>
   </div>
-
+  <button class="copy-btn" id="copyCodeBtn" title="Copiar código" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+  </button>
+</div>
   <div class="stats-row">
     <div class="stat-card"><div class="num" id="statTotal">0</div><div class="lbl">Bipados</div></div>
     <div class="stat-card found"><div class="num" id="statFound">0</div><div class="lbl">Encontrados</div></div>
